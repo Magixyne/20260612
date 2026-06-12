@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>🍅 番茄钟 · 专注备忘录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 100%);
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 主容器卡片布局 */
+        .app-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.8rem;
+            align-items: start;
+        }
+
+        /* 公用卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem 1.2rem 1.8rem;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 25px 40px -14px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #ffd966;
+            padding-bottom: 0.7rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #c2410c, #e07c3c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .card-header span {
+            font-size: 1.9rem;
+        }
+
+        /* 番茄钟大数字 */
+        .timer-box {
+            background: #1e293b;
+            border-radius: 2.5rem;
+            padding: 1.3rem;
+            margin: 1rem 0 1.2rem;
+            text-align: center;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.2), 0 10px 20px -5px rgba(0,0,0,0.2);
+        }
+
+        .timer-display {
+            font-size: 4.5rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+            letter-spacing: 6px;
+            background: linear-gradient(135deg, #facc15, #ffb347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 500px) {
+            .timer-display {
+                font-size: 5.5rem;
+                letter-spacing: 8px;
+            }
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1rem 0 1rem;
+        }
+
+        .btn {
+            border: none;
+            background: #f1f5f9;
+            padding: 0.65rem 1.3rem;
+            border-radius: 2.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #f97316;
+            color: white;
+            box-shadow: 0 4px 8px rgba(249,115,22,0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+            background: #ea580c;
+        }
+
+        .btn-secondary {
+            background: #475569;
+            color: white;
+        }
+
+        .btn-secondary:active {
+            background: #334155;
+            transform: scale(0.96);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
+
+        .btn-outline:active {
+            background: #f8fafc;
+        }
+
+        .stat-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fef9e3;
+            padding: 0.7rem 1rem;
+            border-radius: 2rem;
+            margin-top: 1rem;
+        }
+
+        .tomato-count {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            background: #fff0db;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+        }
+
+        .tomato-count span:first-child {
+            font-size: 1.3rem;
+        }
+
+        /* 备忘录区域 */
+        .memo-input-area {
+            display: flex;
+            gap: 0.7rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .memo-input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.95rem;
+            background: #ffffff;
+            transition: 0.2s;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .memo-input:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.2);
+        }
+
+        .btn-add {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 0 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-add:active {
+            background: #ea580c;
+            transform: scale(0.96);
+        }
+
+        .memo-list {
+            list-style: none;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .memo-item {
+            background: #ffffffd9;
+            backdrop-filter: blur(2px);
+            margin: 0.7rem 0;
+            padding: 0.7rem 0.9rem;
+            border-radius: 1.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            transition: 0.1s;
+            border: 1px solid #ffe4ca;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .memo-text {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: 500;
+            word-break: break-word;
+            color: #1e293b;
+            padding: 0.1rem 0;
+        }
+
+        .memo-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 2rem;
+            transition: background 0.2s;
+            opacity: 0.7;
+        }
+
+        .icon-btn:hover {
+            background: #f1f5f9;
+            opacity: 1;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
+        }
+
+        .clear-all {
+            margin-top: 1rem;
+            text-align: right;
+        }
+
+        .clear-btn {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293bdc;
+            backdrop-filter: blur(8px);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 1000;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            opacity: 0;
+            white-space: nowrap;
+            max-width: 90vw;
+            white-space: normal;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 720px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .card {
+                padding: 1.2rem;
+            }
+            .timer-display {
+                font-size: 3.8rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.7rem;
+            color: #64748b;
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 番茄钟卡片 -->
+    <div class="card">
+        <div class="card-header">
+            <span>🍅</span>
+            <h2>番茄钟</h2>
+        </div>
+        <div class="timer-box">
+            <div class="timer-display" id="timerDisplay">25:00</div>
+        </div>
+        <div class="button-group">
+            <button class="btn btn-primary" id="startBtn">▶ 开始</button>
+            <button class="btn btn-outline" id="pauseBtn">⏸️ 暂停</button>
+            <button class="btn btn-secondary" id="resetBtn">🔄 重置</button>
+        </div>
+        <div class="stat-area">
+            <div class="tomato-count">
+                <span>🍅</span>
+                <span id="pomoCount">0</span>
+                <span style="font-weight:normal">个番茄</span>
+            </div>
+            <button class="clear-btn" id="resetCountBtn" style="background:#e9e9ef; color:#475569;">重置计数</button>
+        </div>
+        <div style="font-size: 0.7rem; text-align: center; margin-top: 12px; color:#9ca3af;">
+            ⏱️ 25分钟专注，自然结束自动+1番茄
+        </div>
+    </div>
+
+    <!-- 备忘录卡片 -->
+    <div class="card">
+        <div class="card-header">
+            <span>📝</span>
+            <h2>备忘录</h2>
+        </div>
+        <div class="memo-input-area">
+            <input type="text" id="memoInput" class="memo-input" placeholder="写下待办或灵感..." autocomplete="off">
+            <button id="addMemoBtn" class="btn-add">➕ 添加</button>
+        </div>
+        <ul id="memoList" class="memo-list">
+            <li style="text-align: center; color: #94a3b8; padding: 1rem;">暂无备忘，添加一条吧 ✍️</li>
+        </ul>
+        <div class="clear-all">
+            <button id="clearAllMemosBtn" class="clear-btn" style="background:#ffe4e2;">🗑️ 清空全部备忘</button>
+        </div>
+    </div>
+    <footer>⚡ 专注每一刻 · 记得兑现小目标</footer>
+</div>
+<div id="toastMsg" class="toast-msg"></div>
+
+<script>
+    (function(){
+        // ---------- 🌟 番茄钟逻辑 ----------
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const pomoCountSpan = document.getElementById('pomoCount');
+        const resetCountBtn = document.getElementById('resetCountBtn');
+
+        let workDuration = 25 * 60;     // 25分钟 = 1500秒
+        let currentSeconds = workDuration;
+        let timerInterval = null;
+        let isRunning = false;
+        let completedPomodoros = 0;      // 完成的番茄个数 (内存)
+        let naturalEndFlag = false;       // 辅助防止重复累计 (在一次自然结束时避免多次累加)
+      // 加载本地存储的番茄计数 (可选，让计数持久化)
+        function loadPomoCount() {
+            const saved = localStorage.getItem('pomoCompletedCount');
+            if(saved !== null && !isNaN(parseInt(saved))) {
+                completedPomodoros = parseInt(saved);
+            } else {
+                completedPomodoros = 0;
+            }
+            updatePomoCounterUI();
+        }
+        function savePomoCount() {
+            localStorage.setItem('pomoCompletedCount', completedPomodoros);
+        }
+        function updatePomoCounterUI() {
+            pomoCountSpan.innerText = completedPomodoros;
+        }
+
+        // 增加番茄计数 (完成一个专注时段)
+        function incrementPomo() {
+            completedPomodoros++;
+            updatePomoCounterUI();
+            savePomoCount();
+            showToast('🎉 恭喜完成一个番茄钟！ 🎉', 2500);
+        }
+
+        // 重置番茄计数
+        function resetPomoCount() {
+            completedPomodoros = 0;
+            updatePomoCounterUI();
+            savePomoCount();
+            showToast('🍅 番茄计数已归零', 1500);
+        }
+
+        // 更新时间显示 (秒转 mm:ss)
+        function updateTimerDisplay() {
+            const mins = Math.floor(currentSeconds / 60);
+            const secs = currentSeconds % 60;
+            timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            // 动态颜色: 小于1分钟时闪烁效果 (仅文字颜色)
+            if(currentSeconds <= 60 && currentSeconds > 0 && isRunning) {
+                timerDisplay.style.opacity = '0.8';
+            } else {
+                timerDisplay.style.opacity = '1';
+            }
+        }
+
+        // 清除计时器
+        function stopTimer() {
+            if(timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isRunning = false;
+        }
+
+        // 计时核心递减
+        function tick() {
+            if (currentSeconds > 0) {
+                currentSeconds--;
+                updateTimerDisplay();
+                // 自然结束
+                if (currentSeconds === 0) {
+                    // 倒计时自然结束
+                    stopTimer();                // 停止计时器
+                    isRunning = false;
+                    updateTimerDisplay();        // 显示00:00
+                    // 增加番茄计数 (仅在自然结束时触发一次)
+                    if (!naturalEndFlag) {
+                        naturalEndFlag = true;
+                        incrementPomo();
+                    }
+                    // 额外提醒  (toast提示)
+                    showToast('⏰ 时间到啦！专注结束，休息一下～', 2800);
+                    // 可选: 修改标题闪烁一下，再恢复
+                    document.title = '✅ 番茄完成！';
+                    setTimeout(() => { document.title = '🍅 番茄钟·备忘录'; }, 2000);
+                    // 重置标志位在reset或重新开始后再重置比较好，但下次开始自然结束需要重新标记
+                    // 保留标志位直到重置或者开始新计时时清除标志
+                }
+            } else {
+                // 防止秒数为0后继续运行 (已经stop)
+                if (currentSeconds === 0) {
+                    stopTimer();
+                }
+            }
+        }
+
+        // 开始倒计时
+        function startTimer() {
+            if (isRunning) return;
+            // 如果当前为0，不能开始，用户需重置
+            if (currentSeconds === 0) {
+                showToast('⛔ 时间已归零，请按「重置」后再开始', 1500);
+                return;
+            }
+            // 重置自然结束标志 (新的一轮专注)
+            naturalEndFlag = false;
+            stopTimer(); // 避免重叠
+            isRunning = true;
+            timerInterval = setInterval(() => {
+                tick();
+                // 额外: 如果计时器结束且currentSeconds === 0，在tick里会停掉，不用再操作
+                if(currentSeconds === 0) {
+                    // 确保完全停止timer
+                    if(timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        isRunning = false;
+                    }
+                }
+            }, 1000);
+        }
+
+function pauseTimer() {
+            if (!isRunning) return;
+            stopTimer();
+            showToast('⏸️ 计时已暂停', 1000);
+        }
+
+        function resetTimer() {
+            stopTimer();
+            currentSeconds = workDuration;
+            updateTimerDisplay();
+            isRunning = false;
+            naturalEndFlag = false;   // 重置自然结束标志，避免再次增加计数
+            showToast('🔄 计时器已重置为25:00', 1200);
+            // 恢复正常标题
+            document.title = '🍅 番茄钟·备忘录';
+        }
+
+        // 监听页面关闭前清除定时器 (非必须但良好)
+        window.addEventListener('beforeunload', () => {
+            if(timerInterval) clearInterval(timerInterval);
+        });
+
+        // 初始化番茄UI
+        function initPomodoro() {
+            loadPomoCount();
+            currentSeconds = workDuration;
+            updateTimerDisplay();
+            isRunning = false;
+            naturalEndFlag = false;
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // ---------- 📌 备忘录 (localStorage持久化) ----------
+        let memos = [];   // 每个元素 { id, text }
+        const memoInput = document.getElementById('memoInput');
+        const addMemoBtn = document.getElementById('addMemoBtn');
+        const memoListContainer = document.getElementById('memoList');
+        const clearAllMemosBtn = document.getElementById('clearAllMemosBtn');
+
+        // 加载备忘录存储
+        function loadMemosFromStorage() {
+            const stored = localStorage.getItem('pomo_memos');
+            if(stored) {
+                try {
+                    memos = JSON.parse(stored);
+                    if(!Array.isArray(memos)) memos = [];
+                } catch(e) { memos = []; }
+            } else {
+                // 演示数据: 加入示例友好提醒
+                memos = [
+                    { id: Date.now() + 1, text: '📖 阅读《原子习惯》20页' },
+                    { id: Date.now() + 2, text: '✍️ 完成项目文档' },
+                    { id: Date.now() + 3, text: '🧘 休息5分钟，伸展身体' }
+                ];
+            }
+            renderMemoList();
+        }
+
+        function saveMemosToStorage() {
+            localStorage.setItem('pomo_memos', JSON.stringify(memos));
+        }
+
+        // 渲染备忘录列表
+        function renderMemoList() {
+            if(!memoListContainer) return;
+            if(memos.length === 0) {
+                memoListContainer.innerHTML = '<li style="text-align: center; color: #94a3b8; padding: 1rem;">✨ 暂无备忘，添加一条吧 ✍️</li>';
+                return;
+            }
+            const fragment = document.createDocumentFragment();
+            memos.forEach(memo => {
+                const li = document.createElement('li');
+                li.className = 'memo-item';
+                li.dataset.id = memo.id;
+                const spanText = document.createElement('span');
+                spanText.className = 'memo-text';
+                spanText.innerText = memo.text;
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'memo-actions';
+                // 编辑按钮
+                const editBtn = document.createElement('button');
+                editBtn.className = 'icon-btn';
+                editBtn.innerHTML = '✏️';
+                editBtn.title = '编辑备忘';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editMemoById(memo.id);
+                });
+                // 删除按钮
+                const delBtn = document.createElement('button');
+                delBtn.className = 'icon-btn';
+                delBtn.innerHTML = '❌';
+                delBtn.title = '删除备忘';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteMemoById(memo.id);
+                });
+                actionsDiv.appendChild(editBtn);
+                actionsDiv.appendChild(delBtn);
+                li.appendChild(spanText);
+                li.appendChild(actionsDiv);
+                fragment.appendChild(li);
+            });
+            memoListContainer.innerHTML = '';
+            memoListContainer.appendChild(fragment);
+        }
+
+        // 添加新备忘录
+        function addMemo(text) {
+            const trimmed = text.trim();
+            if(trimmed === '') {
+                showToast('📝 内容不能为空', 1200);
+                return false;
+            }
+            const newMemo = {
+                id: Date.now(),
+                text: trimmed,
+            };
+            memos.unshift(newMemo); // 最新在上方
+            saveMemosToStorage();
+            renderMemoList();
+            showToast('✅ 备忘已添加', 1000);
+            return true;
+        }
+
+        // 编辑备忘录
+        function editMemoById(id) {
+            const memo = memos.find(m => m.id === id);
+            if(!memo) return;
+            const newText = prompt('编辑备忘内容', memo.text);
+            if(newText !== null && newText.trim() !== '') {
+                memo.text = newText.trim();
+                saveMemosToStorage();
+                renderMemoList();
+                showToast('✏️ 备忘已更新', 1000);
+            } else if(newText !== null && newText.trim() === '') {
+                showToast('内容不能为空，未修改', 1200);
+            }
+        }
+
+        // 删除备忘
+        function deleteMemoById(id) {
+            const beforeLen = memos.length;
+            memos = memos.filter(m => m.id !== id);
+            if(memos.length !== beforeLen) {
+                saveMemosToStorage();
+                renderMemoList();
+                showToast('🗑️ 已删除备忘', 1000);
+            }
+        }
+
+        function clearAllMemos() {
+            if(memos.length === 0) {
+                showToast('已经没有备忘啦', 1000);
+                return;
+            }
+            const confirmClear = confirm('⚠️ 确定要清空所有备忘吗？此操作不可撤销。');
+            if(confirmClear) {
+                memos = [];
+                saveMemosToStorage();
+                renderMemoList();
+                showToast('🧹 所有备忘已清空', 1400);
+            }
+        }
+
+        // 全局简洁Toast
+        let toastTimeout = null;
+        function showToast(message, duration = 2000) {
+            const toastEl = document.getElementById('toastMsg');
+            if(!toastEl) return;
+            if(toastTimeout) clearTimeout(toastTimeout);
+            toastEl.innerText = message;
+            toastEl.style.opacity = '1';
+            toastTimeout = setTimeout(() => {
+                toastEl.style.opacity = '0';
+            }, duration);
+        }
+
+        // 增加回车添加备忘录
+        function bindMemoEvents() {
+            addMemoBtn.addEventListener('click', () => {
+                const text = memoInput.value;
+                if(addMemo(text)) {
+                    memoInput.value = '';
+                    memoInput.focus();
+                }
+            });
+            memoInput.addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') {
+                    e.preventDefault();
+                    const text = memoInput.value;
+                    if(addMemo(text)) {
+                        memoInput.value = '';
+                    }
+                }
+            });
+            clearAllMemosBtn.addEventListener('click', clearAllMemos);
+        }
+
+        // ---------- 番茄钟按钮绑定 ----------
+        function bindPomodoroEvents() {
+            startBtn.addEventListener('click', startTimer);
+            pauseBtn.addEventListener('click', pauseTimer);
+            resetBtn.addEventListener('click', resetTimer);
+            resetCountBtn.addEventListener('click', resetPomoCount);
+        }
+
+        // 页面关闭前做一次存储同步 (确保番茄计数已存)
+        window.addEventListener('beforeunload', () => {
+            savePomoCount();
+            saveMemosToStorage();
+            if(timerInterval) clearInterval(timerInterval);
+        });
+
+        // 初始化整个应用
+        function init() {
+            initPomodoro();
+            loadMemosFromStorage();
+            bindPomodoroEvents();
+            bindMemoEvents();
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
