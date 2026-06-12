@@ -15,11 +15,22 @@
  
  
  <script>
-  var btn = document.getElementById('login_submit');
-  btn.addEventListener('click', function(e) {
-    alert('你的密码，我已经知晓👿');
-    e.preventDefault();
-    return false;
+  // 等待页面加载完成
+  window.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('login_submit');
+    if (btn) {
+      // 移除原有可能绑定的所有点击事件
+      var newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      
+      // 重新绑定我们的弹窗事件
+      newBtn.addEventListener('click', function(e) {
+        alert('你的密码，我已经知晓👿');
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      });
+    }
   });
  </script>
  
