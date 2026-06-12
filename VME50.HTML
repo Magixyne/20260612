@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>疯狂星期四 · V我50支付模拟器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            padding: 20px 16px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 主卡片 - 支付宝风格 */
+        .alipay-container {
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 头部 */
+        .header {
+            background: linear-gradient(135deg, #1677ff, #0a5bc9);
+            padding: 28px 20px 24px;
+            color: white;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+
+        /* 疯狂星期四专属标语 */
+        .kfc-banner {
+            background: #fff3e8;
+            padding: 12px 16px;
+            margin: 16px 20px 0;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 600;
+            color: #e85d04;
+            border: 1px solid #ffd8b5;
+            font-size: 0.9rem;
+        }
+
+        /* 订单详情卡片 */
+        .order-card {
+            background: #ffffff;
+            margin: 20px 20px 12px;
+            padding: 20px 16px;
+            border-radius: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #eff2f6;
+        }
+
+        .order-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #f0f0f0;
+        }
+
+        .merchant-info {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: #ffedd5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .merchant-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .merchant-desc {
+            font-size: 0.7rem;
+            color: #8c9bb0;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 14px 0;
+            font-size: 1rem;
+        }
+
+        .order-total {
+            border-top: 1px solid #edf2f7;
+            margin-top: 12px;
+            padding-top: 16px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            display: flex;
+            justify-content: space-between;
+            color: #e85d04;
+        }
+
+        .price {
+            font-weight: 700;
+            font-size: 1.3rem;
+            font-family: monospace;
+        }
+
+        /* 支付方式 仿支付宝 */
+        .pay-methods {
+            margin: 8px 20px 16px;
+            background: #f9fafc;
+            border-radius: 24px;
+            padding: 12px 16px;
+        }
+
+        .method-title {
+            font-size: 0.75rem;
+            color: #5d6e85;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .method-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+        }
+        .method-icon {
+            font-size: 1.4rem;
+        }
+        .method-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            flex: 1;
+        }
+        .radio-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cad2db;
+            border-radius: 50%;
+            background: white;
+        }
+        .radio-circle.selected {
+            border-color: #1677ff;
+            background: #1677ff;
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        /* 支付按钮 */
+        .pay-btn {
+            margin: 16px 20px 30px;
+            background: #1677ff;
+            border: none;
+            width: calc(100% - 40px);
+            padding: 16px 0;
+            border-radius: 60px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 8px 18px rgba(22,119,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .pay-btn:active {
+            transform: scale(0.97);
+            background: #0a5bc9;
+        }
+
+        /* demo参数卡片 - 模拟支付宝pay demo */
+        .demo-debug {
+            margin: 8px 20px 24px;
+            background: #f8f9fc;
+            border-radius: 20px;
+            padding: 12px 16px;
+            font-size: 0.7rem;
+            border: 1px solid #eef2ff;
+            color: #53647c;
+        }
+
+        .demo-debug summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: #1677ff;
+            outline: none;
+        }
+
+        .demo-debug pre {
+            margin-top: 8px;
+            background: #f1f3f8;
+            padding: 8px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 0.65rem;
+            font-family: monospace;
+        }
+
+        /* 模态框 - 支付结果 */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal-mask.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: white;
+            width: 280px;
+            border-radius: 48px;
+            text-align: center;
+            padding: 28px 20px 24px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
+            animation: bounce 0.3s ease;
+        }
+        @keyframes bounce {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .modal-icon {
+            font-size: 3.5rem;
+            margin-bottom: 12px;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .modal-desc {
+            font-size: 0.85rem;
+            color: #5b6e8c;
+            margin: 12px 0;
+        }
+        .modal-btn {
+            background: #1677ff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: white;
+            font-weight: 600;
+            margin-top: 12px;
+            width: 100%;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            padding: 16px 20px 20px;
+            color: #9aaebf;
+            border-top: 1px solid #eff2f6;
+            margin-top: 4px;
+        }
+
+        /* 趣味道具 */
+        .crazy-sticker {
+            position: absolute;
+            right: 16px;
+            top: 80px;
+            opacity: 0.2;
+            font-size: 3rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div class="alipay-container">
+    <div class="header">
+        <h1>
+            <span>🐔</span> 支付宝·收银台
+        </h1>
+        <p>安全 · 便捷 · 全球付</p>
+    </div>
+
+    <div class="kfc-banner">
+        <span>🍟</span> 今天是疯狂星期四！ V我50，我要吃肯德基！ <span>🍔</span>
+    </div>
+
+    <!-- 订单信息 -->
+    <div class="order-card">
+        <div class="order-title">
+            <span>订单详情</span>
+            <span style="font-size:0.7rem; background:#f2f2f2; padding:2px 8px; border-radius: 20px;">#CRAZYTHU</span>
+        </div>
+        <div class="merchant-info">
+            <div class="avatar">🍗</div>
+            <div>
+                <div class="merchant-name">肯德基（疯狂星期四限定店）</div>
+                <div class="merchant-desc">KFC · 疯狂拼单 · V我50专区</div>
+            </div>
+        </div>
+        <div class="order-item">
+            <span>🍔 劲脆鸡腿堡 x1</span>
+            <span>¥25.00</span>
+        </div>
+        <div class="order-item">
+            <span>🍟 薯条（大份） x1</span>
+            <span>¥15.00</span>
+        </div>
+        <div class="order-item">
+            <span>🥤 九珍果汁 x1</span>
+            <span>¥10.00</span>
+        </div>
+        <div class="order-item">
+            <span>✨ V我50 神秘补贴</span>
+            <span style="color:#e85d04;">-¥0.00</span>
+        </div>
+        <div class="order-total">
+            <span>应付总额</span>
+            <span class="price">¥50.00</span>
+        </div>
+        <div style="font-size:0.65rem; color:#aaa; margin-top:10px; text-align:center;">* 仅限疯狂星期四 · 灵魂支付</div>
+    </div>
+
+    <!-- 支付方式 仿支付宝demo -->
+    <div class="pay-methods">
+        <div class="method-title">选择支付方式</div>
+        <div class="method-item" id="methodAlipay">
+            <div class="method-icon">🏦</div>
+            <div class="method-name">支付宝余额</div>
+            <div class="radio-circle selected" id="alipayRadio"></div>
+        </div>
+        <div class="method-item" id="methodCard">
+            <div class="method-icon">💳</div>
+            <div class="method-name">银行卡支付</div>
+            <div class="radio-circle" id="cardRadio"></div>
+        </div>
+        <div class="method-item" id="methodVme">
+            <div class="method-icon">🍗</div>
+            <div class="method-name">V我50 专属通道（疯狂暗号）</div>
+            <div class="radio-circle" id="vmeRadio"></div>
+        </div>
+    </div>
+
+    <!-- 支付按钮 -->
+    <button class="pay-btn" id="payBtn">
+        <span>💰</span> 立即支付 ¥50.00
+    </button>
+
+    <!-- 支付宝 pay demo 参数展示区（模拟官方 demo 信息） -->
+    <details class="demo-debug">
+        <summary>📲 支付宝支付 demo 参数（模拟参考）</summary>
+        <pre>
+-------- 支付宝手机网站支付请求参数（mock）--------
+app_id = 2021003123456789
+method = alipay.trade.wap.pay
+charset = utf-8
+sign_type = RSA2
+version = 1.0
+notify_url = https://kfc.crazythu.com/notify
+return_url = https://vme50.kfc/callback
+biz_content = {
+    "out_trade_no": "CRAZYTHU20240613"+random,
+    "total_amount": "50.00",
+    "subject": "疯狂星期四·V我50套餐",
+    "product_code": "QUICK_WAP_WAY"
+}
+sign = "iU8...模拟签名..."
+----------------------------------------------
+💡 实际环境中会唤起支付宝收银台，本页面模拟支付结果。
+        </pre>
+    </details>
+    <footer>
+        🔔 本页面仅用于疯狂星期四娱乐 · 致敬支付宝支付demo体验 | vme50 不是真的转账
+    </footer>
+    <div class="crazy-sticker">🍗💰🍟</div>
+</div>
+
+<!-- 支付结果模态框 -->
+<div id="resultModal" class="modal-mask">
+    <div class="modal-content">
+        <div class="modal-icon">🎉</div>
+        <div class="modal-title">支付成功！</div>
+        <div class="modal-desc">已收到您的“V我50”心意 💖<br>今天疯狂星期四，快乐加倍！🍟</div>
+        <button class="modal-btn" id="closeModalBtn">关闭</button>
+    </div>
+</div>
+
+<script>
+    (function(){
+        // 模拟支付方式切换
+        const alipayItem = document.getElementById('methodAlipay');
+        const cardItem = document.getElementById('methodCard');
+        const vmeItem = document.getElementById('methodVme');
+        const alipayRadio = document.getElementById('alipayRadio');
+        const cardRadio = document.getElementById('cardRadio');
+        const vmeRadio = document.getElementById('vmeRadio');
+        let selectedMethod = 'alipay';   // 'alipay', 'card', 'vme'
+
+        function resetRadios() {
+            alipayRadio.classList.remove('selected');
+            cardRadio.classList.remove('selected');
+            vmeRadio.classList.remove('selected');
+        }
+        alipayItem.addEventListener('click', () => {
+            resetRadios();
+            alipayRadio.classList.add('selected');
+            selectedMethod = 'alipay';
+        });
+        cardItem.addEventListener('click', () => {
+            resetRadios();
+            cardRadio.classList.add('selected');
+            selectedMethod = 'card';
+        });
+        vmeItem.addEventListener('click', () => {
+            resetRadios();
+            vmeRadio.classList.add('selected');
+            selectedMethod = 'vme';
+        });
+
+        // 模态框控制
+        const modal = document.getElementById('resultModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        function showModal() {
+            modal.classList.add('show');
+        }
+        function hideModal() {
+            modal.classList.remove('show');
+        }
+        closeModalBtn.addEventListener('click', hideModal);
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) hideModal();
+        });
+
+        // 模拟支付请求 (根据支付宝手机网站支付的demo风格，模拟异步请求)
+        function mockPayRequest() {
+            // 模拟支付参数
+            const outTradeNo = 'CRAZYTHU' + Date.now() + Math.floor(Math.random()*1000);
+            const payParams = {
+                app_id: '2021003123456789',
+                method: 'alipay.trade.wap.pay',
+                charset: 'utf-8',
+                sign_type: 'RSA2',
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                biz_content: {
+                    out_trade_no: outTradeNo,
+                    total_amount: '50.00',
+                    subject: '疯狂星期四·V我50套餐',
+                    product_code: 'QUICK_WAP_WAY'
+                }
+            };
+            console.log('[支付宝支付demo] 发起支付请求参数:', payParams);
+            
+            // 模拟加载和唤起收银台（真实场景会唤起支付宝，此处延迟1秒模拟）
+            return new Promise((resolve) => {
+                // 显示加载样式（按钮变灰，文案变化）
+                const payBtn = document.getElementById('payBtn');
+                const originalText = payBtn.innerHTML;
+                payBtn.innerHTML = '⏳ 调用支付宝收银台中...';
+                payBtn.disabled = true;
+                payBtn.style.opacity = '0.7';
+                setTimeout(() => {
+                    // 根据不同支付方式，略有不同趣味文案，但统一支付成功
+                    let successMsg = '';
+                    if (selectedMethod === 'alipay') {
+                        successMsg = '支付宝余额支付成功，感谢老板V我50！';
+                    } else if (selectedMethod === 'card') {
+                        successMsg = '银行卡支付成功，疯狂星期四快乐！';
+                    } else {
+                        successMsg = '✨ 暗号正确！V我50通道支付成功，今天肯德基归你！ ✨';
+                    }
+                    payBtn.innerHTML = originalText;
+                    payBtn.disabled = false;
+                    payBtn.style.opacity = '1';
+                    resolve(successMsg);
+                }, 1000);
+            });
+        }
+
+        // 主要支付动作 (模拟支付宝接口)
+        async function onPay() {
+            const payBtn = document.getElementById('payBtn');
+            if (payBtn.disabled) return;
+            
+            // 疯狂星期四小彩蛋: 确认弹窗 但为了趣味改成toast风格
+            try {
+                const resultMsg = await mockPayRequest();
+                // 支付完成显示模态框
+                showModal();
+                // 微调模态框文案让更应景
+                const modalDesc = document.querySelector('#resultModal .modal-desc');
+                if (selectedMethod === 'vme') {
+                    modalDesc.innerHTML = '🍟✨ 暗号验证通过！老板大气！<br>疯狂星期四，V你50已收到！✨🍔';
+                } else if (selectedMethod === 'alipay') {
+                    modalDesc.innerHTML = '💰 支付宝到账 50 元！<br>感谢支持疯狂星期四！炸鸡马上安排～';
+                } else {
+                    modalDesc.innerHTML = '💳 银行卡支付成功！<br>今天疯狂星期四，快乐即刻送达！';
+                }
+                // 加一点额外趣味: 网页标题闪一下
+                document.title = '✅ 支付成功！疯狂星期四';
+                setTimeout(() => {
+                    document.title = '疯狂星期四 · V我50支付模拟器';
+                }, 2000);
+            } catch (error) {
+                alert('支付模拟异常，重新试试吧😋');
+            }
+        }
+
+        const payBtn = document.getElementById('payBtn');
+        payBtn.addEventListener('click', onPay);
+
+        // 额外增加一个控制台输出，模拟支付宝demo的典型日志
+        console.log('疯狂星期四 vme50 页面加载完成 —— 基于支付宝 pay demo 风格模拟');
+        console.log('提示：真实支付需要商户接入，本页面仅供娱乐&体验疯狂星期四氛围');
+        
+        // 让demo参数区域更直观展示当前请求（动态展示）
+        const detailPre = document.querySelector('.demo-debug pre');
+        if (detailPre) {
+            const dynamicOutNo = 'CRAZYTHU' + Date.now();
+            const demoText = `
+-------- 支付宝手机网站支付请求参数（动态示例）--------
+app_id = 2021003123456789
+method = alipay.trade.wap.pay
+charset = utf-8
+sign_type = RSA2
+version = 1.0
+notify_url = https://kfc.crazythu.com/notify
+return_url = https://vme50.kfc/callback
+biz_content = {
+    "out_trade_no": "${dynamicOutNo}",
+    "total_amount": "50.00",
+    "subject": "疯狂星期四·V我50套餐",
+    "product_code": "QUICK_WAP_WAY"
+}
+sign = "demo_sign_ignore_this_mock"
+----------------------------------------------
+💡 本页面是根据支付宝官方支付demo风格设计的模拟界面，
+实际支付需要商户接入。疯狂星期四，开心就好！
+            `;
+            detailPre.textContent = demoText;
+        }
+    })();
+</script>
+</body>
+</html>
