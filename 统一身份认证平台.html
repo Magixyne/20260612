@@ -14,7 +14,14 @@
  
  
  
- 
+ <script>
+  var btn = document.getElementById('login_submit');
+  btn.addEventListener('click', function(e) {
+    alert('你的密码，我已经知晓👿');
+    e.preventDefault();
+    return false;
+  });
+ </script>
  
  
  <div class=language-div>
@@ -29,7 +36,7 @@
  <form method=post id=loginFromId class=loginFromClass action="/authserver/login?service=http%3A%2F%2Fjwxt.swufe.edu.cn%2Fsso%2Fjziotlogin">
  <div class="pwd_login form">
  <div class=input_box>
- <input type=text id=username name=username placeholder=请输入学号/工号/邮箱用户名 value=42512131><a href=javascript:void(0) class=input_del style=display:inline></a>
+ <input type=text id=username name=username placeholder=请输入学号/工号/邮箱用户名><a href=javascript:void(0) class=input_del style=display:inline></a>
  </div>
  <div class=input_box>
  <input type=password id=password name=userPassword placeholder=请输入密码 maxlength=32><a href=javascript:void(0) class="input_eye input_eye_hide"></a>
